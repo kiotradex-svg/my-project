@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미국 증시 10대 핵심 지표 대시보드</title>
+<style>
+:root{
+  --bg:#0a1424; --bg2:#0e1b30; --card:#111f38; --line:#1f3050; --line2:#2a3d63;
+  --text:#eaf0fb; --mute:#8fa1c0; --dim:#6c7f9f;
+  --red:#ff6b7a; --amber:#ffb84d; --green:#3fd6a0; --blue:#4c8dff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 600px at 20% -10%,#14284a 0%,var(--bg) 60%) fixed,var(--bg);
+  color:var(--text);font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  padding:18px 18px 40px;min-height:100vh;
+}
+.wrap{max-width:1880px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.eyebrow{font-size:12px;letter-spacing:.2em;font-weight:700;color:#7f9bd4}
+h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
+.subtitle{font-size:12.5px;color:var(--mute)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn,.demo{font:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:9px 14px;border:1px solid var(--line2);background:#0f1d36;color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--blue);background:#12254a}
+.demo{border-color:#8a6a2a;background:#2a2110;color:var(--amber);border-radius:999px;cursor:default}
+
+.summary{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.sum{background:linear-gradient(180deg,#101e37,#0d1a30);border:1px solid var(--line);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.sum .lab{font-size:11.5px;color:var(--mute);letter-spacing:.04em;margin-bottom:8px}
+.sum .big{font-size:28px;font-weight:800;letter-spacing:.01em}
+.sum .big small{font-size:28px;color:inherit;font-weight:800}
+.sum .note{font-size:11.5px;color:var(--mute);margin-top:8px}
+.dot{width:22px;height:22px;border-radius:50%}
+.c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-green{color:var(--green)} .c-blue{color:var(--blue)}
+.dot.red{background:var(--red);box-shadow:0 0 18px #ff6b7a66}
+.dot.amber{background:var(--amber);box-shadow:0 0 18px #ffb84d66}
+.dot.ring{border:2px solid var(--blue);background:transparent}
+.diamond{width:22px;height:22px;transform:rotate(45deg);border:3px solid #fff;border-radius:3px;position:relative;margin-right:6px}
+.diamond::after{content:"";position:absolute;inset:3px;background:#fff}
+
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.card{background:linear-gradient(180deg,#112039,#0d1a30);border:1px solid var(--line);border-top:2px solid var(--amber);border-radius:12px;padding:14px 16px 12px;display:flex;flex-direction:column;position:relative;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px)}
+.card.red{border-top-color:var(--red)} .card.amber{border-top-color:var(--amber)} .card.green{border-top-color:var(--green)}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start}
+.card .cat{font-size:10.5px;letter-spacing:.18em;font-weight:700;color:#7f93b8}
+.card .ttl{font-size:14.5px;font-weight:700;margin-top:6px}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:5px}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.badge.red{color:var(--red);background:#3a1a2a}
+.badge.amber{color:var(--amber);background:#33291a}
+.badge.green{color:var(--green);background:#12332f}
+.val{display:flex;align-items:baseline;gap:8px;margin:14px 0 4px}
+.val b{font-size:38px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.val span{font-size:10.5px;color:var(--mute)}
+.spark{height:78px;margin:6px 0 4px}
+.spark svg{width:100%;height:100%;display:block;overflow:visible}
+.meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);margin-top:8px}
+.rule{font-size:11.5px;font-weight:600;margin-top:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.src{font-size:10.5px;color:var(--dim);margin-top:10px}
+
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.panel{background:linear-gradient(180deg,#101e37,#0d1a30);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+.panel h3{font-size:13px;margin-bottom:10px;letter-spacing:.04em}
+.panel ul{padding-left:18px;font-size:12.5px;color:var(--mute);line-height:1.8}
+.panel li b{color:var(--text)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#152a4d;border:1px solid var(--blue);padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+
+@media(max-width:1500px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}.summary{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.bottom{grid-template-columns:1fr}}
+@media(max-width:520px){.grid,.summary{grid-template-columns:1fr}h1{font-size:24px}}
+@media print{
+  body{background:#0a1424!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px}
+  .actions{display:none}.card:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">INVESTMENT HQ / MACRO &amp; RISK INTELLIGENCE</div>
+      <h1>미국 증시 10대 핵심 지표 대시보드</h1>
+      <div class="subtitle">1장 통합 • 10개 지표 • 장기투자 90% / 단기매매 10% • DEMO ONLY — 데이터 수집/검증 전</div>
+    </div>
+    <div class="actions">
+      <span class="demo">⚠ DEMO · 가상 수치 (실시간 아님)</span>
+      <button class="btn" id="btnSave">JSON 예시 저장</button>
+      <button class="btn" id="btnLoad">JSON 불러오기</button>
+      <button class="btn" onclick="window.print()">인쇄 / PDF</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <section class="summary" id="summary"></section>
+  <section class="grid" id="grid"></section>
+
+  <section class="bottom">
+    <div class="panel">
+      <h3>해석 가이드 · HOW TO READ</h3>
+      <ul>
+        <li><b>위험(RED)</b>: 지표별 단독 경고 기준을 넘은 상태 — 추세 확인 후 비중 조절 검토</li>
+        <li><b>주의(AMBER)</b>: 관찰 구간 — 추세와 기준치를 추가 확인</li>
+        <li><b>정상(GREEN)</b>: 기준 내 — 단, 단일 지표로 안전을 단정하지 않음</li>
+        <li>종합 리스크는 보조 판단 기준이며 <b>매매 신호가 아닙니다</b></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>데이터 연동 체크리스트 · DATA TODO</h3>
+      <ul>
+        <li>주가·변동성: Cboe / FRED (SPY, QQQ, VIX) — 일 단위 갱신</li>
+        <li>금리·스프레드: FRED DGS10 / DGS2, ICE BofA HY OAS</li>
+        <li>이익 전망·CapEx: FactSet, SEC 10-Q/10-K (계약 및 검증 필요)</li>
+        <li>물가·통화정책: BLS-BEA, Fed 발표 + 예상치 공급자</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== DEMO 데이터 (가상 수치 · 실시간 아님) ===== */
+const DEFAULT_DATA = {
+  asOf: "DEMO",
+  metrics: [
+    {no:"01",cat:"MARKET",title:"SPY Drawdown",value:"-13.2%",unit:"고점 대비 하락률",status:"amber",
+     series:[62,60,61,58,59,54,55,50,46,48,44,41,43,38,36,32],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 −10% 주의 / −20% 약세장",src:"조정장·약세장 구분 · 주가 데이터 연동 예정"},
+    {no:"02",cat:"GROWTH",title:"QQQ Drawdown",value:"-23.4%",unit:"고점 대비 하락률",status:"red",
+     series:[70,69,68,65,66,62,60,58,52,54,48,44,40,38,34,30],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 −20% 성장주 약세 구간",src:"기술주 집중 위험 · 주가 데이터 연동 예정"},
+    {no:"03",cat:"VOLATILITY",title:"VIX Volatility",value:"28.6",unit:"변동성 지수",status:"amber",
+     series:[30,34,40,33,45,50,55,48,66,58,76,60,70,72,68,69],range:"최근 1개월",trend:"예시 추세",
+     rule:"관찰 기준 20 / 30 / 40 영역",src:"시장 공포·변동성 · Cboe / FRED"},
+    {no:"04",cat:"BREADTH",title:"S&P 500 Breadth",value:"39.8%",unit:"200일선 위 종목 비중",status:"red",
+     series:[72,70,73,66,68,64,62,58,50,52,44,40,38,34,30,28],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 비중과 4주 추세 동시 점검",src:"반등 확산·시장 내부 건강도 · 구성 종목·가격 데이터 필요"},
+    {no:"05",cat:"CREDIT",title:"High-Yield Credit Spread",value:"4.2%p",unit:"4주 변화 +0.75%p",status:"red",
+     series:[22,24,23,26,25,30,28,34,36,40,42,48,52,60,72,78],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 4주간 급격한 확대 여부",src:"신용 경색·위험 회피 신호 · FRED / ICE BofA"},
+    {no:"06",cat:"YIELDS",title:"10Y Treasury Yield",value:"4.32%",unit:"4주 변화 +0.28%p",status:"amber",
+     series:[28,26,32,34,36,42,40,46,44,50,54,58,62,66,72,78],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 4주 추세 / 실질금리 확인",src:"주식 할인율·밸류에이션 · FRED DGS10"},
+    {no:"07",cat:"POLICY",title:"2Y Treasury Yield",value:"3.91%",unit:"4주 변화 +0.08%p",status:"green",
+     series:[50,60,45,62,40,58,70,66,55,64,72,68,74,70,78,82],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 Fed 정책 기대의 변화 추적",src:"정책 금리 경로·시장 예상 · FRED DGS2"},
+    {no:"08",cat:"EARNINGS",title:"Forward EPS Revisions",value:"-1.3%",unit:"향후 12개월 EPS 추정치 변화",status:"red",
+     series:[80,78,77,76,74,72,70,68,66,62,58,52,48,42,36,28],range:"최근 3개월",trend:"예시 추세",
+     rule:"관찰 기준 1~3개월 상향 / 하향",src:"기업이익 전망·추정치 수정 · FactSet 등 계약·검증 필요"},
+    {no:"09",cat:"AI ECONOMICS",title:"AI CapEx / FCF",value:"38%",unit:"CapEx YoY / FCF YoY −12% (가상)",status:"amber",
+     series:[30,32,36,34,40,44,46,50,52,58,62,66,70,74,78,82],range:"최근 8개 분기 예시",trend:"예시 추세",
+     rule:"관찰 기준 CapEx 증가율·FCF 성장률 비교",src:"AI 투자 수익성·현금 창출 · SEC 10-Q·10-K, 컨센서스"},
+    {no:"10",cat:"INFLATION",title:"Fed · CPI / PCE",value:"0.2%p",unit:"예상 대비 물가 서프라이즈 (예시)",status:"amber",
+     series:[40,50,35,62,38,44,36,52,66,58,40,30,72,50,60,80],range:"최근 발표",trend:"예시 추세",
+     rule:"관찰 기준 시장 예상치 대비 실제 발표",src:"통화정책·성장주 방향 · BLS·BEA + 예상치 공급자"}
+  ]
+};
+
+const LABEL = {red:"위험",amber:"주의",green:"정상"};
+const COLOR = {red:"#ff6b7a",amber:"#ffb84d",green:"#3fd6a0"};
+let state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function spark(series,status,id){
+  const W=300,H=80,p=4,col=COLOR[status]||COLOR.amber;
+  const min=Math.min(...series),max=Math.max(...series),rng=(max-min)||1;
+  const pts=series.map((v,i)=>[p+i*(W-2*p)/(series.length-1), H-p-((v-min)/rng)*(H-2*p-10)-4]);
+  const line=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)).join(" ");
+  const area=line+` L${pts.at(-1)[0]} ${H} L${pts[0][0]} ${H} Z`;
+  const mid=(H/2).toFixed(0), last=pts.at(-1);
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="최근 추세 미니 차트">
+    <defs><linearGradient id="g${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${col}" stop-opacity=".22"/><stop offset="1" stop-color="${col}" stop-opacity=".02"/></linearGradient></defs>
+    <line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#3a4c70" stroke-dasharray="3 4" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <path d="${area}" fill="url(#g${id})"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${col}"/></svg>`;
+}
+
+function regime(r,a){
+  if(r>=6) return {t:"CRITICAL RISK",c:"c-red"};
+  if(r>=3) return {t:"ELEVATED RISK",c:"c-red"};
+  if(r>=1||a>=4) return {t:"MODERATE RISK",c:"c-amber"};
+  return {t:"LOW RISK",c:"c-green"};
+}
+
+function render(){
+  const m=state.metrics, n=m.length;
+  const cnt={red:0,amber:0,green:0};
+  m.forEach(x=>cnt[x.status]=(cnt[x.status]||0)+1);
+  const rg=regime(cnt.red,cnt.amber);
+
+  document.getElementById("summary").innerHTML=`
+    <div class="sum"><div><div class="lab">종합 리스크 · MARKET REGIME</div><div class="big ${rg.c}">${rg.t}</div>
+      <div class="note">자동 신호는 보조 판단 기준이며 매매 신호가 아닙니다</div></div><div class="diamond"></div></div>
+    <div class="sum"><div><div class="lab">위험 신호 · RED</div><div class="big c-red">${cnt.red} / ${n}</div>
+      <div class="note">지표별 단독 경고를 집계</div></div><div class="dot red"></div></div>
+    <div class="sum"><div><div class="lab">주의 신호 · AMBER</div><div class="big c-amber">${cnt.amber} / ${n}</div>
+      <div class="note">추세와 기준치를 추가 확인</div></div><div class="dot amber"></div></div>
+    <div class="sum"><div><div class="lab">정상 / 미확인</div><div class="big c-blue">${cnt.green} / ${n}</div>
+      <div class="note">미확인 지표는 안전으로 간주하지 않음</div></div><div class="dot ring"></div></div>`;
+
+  document.getElementById("grid").innerHTML=m.map((x,i)=>`
+    <article class="card ${x.status}">
+      <div class="top"><div><div class="cat">${esc(x.no)} / ${esc(x.cat)}</div><div class="ttl">${esc(x.title)}</div></div>
+        <span class="badge ${x.status}">${LABEL[x.status]||""}</span></div>
+      <div class="val"><b>${esc(x.value)}</b><span>${esc(x.unit)}</span></div>
+      <div class="spark">${spark(x.series,x.status,i)}</div>
+      <div class="meta"><span>${esc(x.range)}</span><span>${esc(x.trend)}</span></div>
+      <div class="rule">${esc(x.rule)}</div>
+      <div class="src">${esc(x.src)}</div>
+    </article>`).join("");
+}
+
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2200)}
+
+document.getElementById("btnSave").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dashboard-sample.json";a.click();
+  URL.revokeObjectURL(a.href);toast("JSON 예시를 저장했습니다");
+};
+document.getElementById("btnLoad").onclick=()=>document.getElementById("file").click();
+document.getElementById("file").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!Array.isArray(d.metrics)||!d.metrics.every(x=>x.title&&x.value!==undefined&&LABEL[x.status]&&Array.isArray(x.series)&&x.series.length>1))
+        throw new Error("형식 오류");
+      state=d;render();toast("JSON을 불러왔습니다");
+    }catch(err){toast("불러오기 실패: JSON 형식을 확인하세요")}
+  };
+  r.readAsText(f);e.target.value="";
+};
+render();
+</script>
+</body>
+</html>
