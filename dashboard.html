@@ -43,7 +43,7 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
 .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
 .card{background:linear-gradient(180deg,#112039,#0d1a30);border:1px solid var(--line);border-top:2px solid var(--amber);border-radius:12px;padding:14px 16px 12px;display:flex;flex-direction:column;position:relative;transition:transform .15s,border-color .15s}
 .card:hover{transform:translateY(-2px)}
-.card.red{border-top-color:var(--red)} .card.amber{border-top-color:var(--amber)} .card.green{border-top-color:var(--green)}
+.card.red{border-top-color:var(--red)} .card.amber{border-top-color:var(--amber)} .card.green{border-top-color:var(--green)} .card.na{border-top-color:#7f93b8}
 .card .top{display:flex;justify-content:space-between;align-items:flex-start}
 .card .cat{font-size:10.5px;letter-spacing:.18em;font-weight:700;color:#7f93b8}
 .card .ttl{font-size:14.5px;font-weight:700;margin-top:6px}
@@ -52,6 +52,8 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
 .badge.red{color:var(--red);background:#3a1a2a}
 .badge.amber{color:var(--amber);background:#33291a}
 .badge.green{color:var(--green);background:#12332f}
+.badge.na{color:#9fb0cf;background:#1c2942}
+.nodata{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim);border:1px dashed var(--line2);border-radius:8px}
 .val{display:flex;align-items:baseline;gap:8px;margin:14px 0 4px}
 .val b{font-size:38px;font-weight:800;letter-spacing:-.02em;line-height:1}
 .val span{font-size:10.5px;color:var(--mute)}
@@ -85,10 +87,10 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
     <div>
       <div class="eyebrow">INVESTMENT HQ / MACRO &amp; RISK INTELLIGENCE</div>
       <h1>미국 증시 10대 핵심 지표 대시보드</h1>
-      <div class="subtitle">1장 통합 • 10개 지표 • 장기투자 90% / 단기매매 10% • DEMO ONLY — 데이터 수집/검증 전</div>
+      <div class="subtitle">1장 통합 • 10개 지표 • 장기투자 90% / 단기매매 10% • 출처·기준일은 각 카드에 표기</div>
     </div>
     <div class="actions">
-      <span class="demo">⚠ DEMO · 가상 수치 (실시간 아님)</span>
+      <span class="demo">● 2026-11-20(금) 기준 · 일부 지표는 최신 확인값</span>
       <button class="btn" id="btnSave">JSON 예시 저장</button>
       <button class="btn" id="btnLoad">JSON 불러오기</button>
       <button class="btn" onclick="window.print()">인쇄 / PDF</button>
@@ -123,50 +125,56 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
 <div class="toast" id="toast"></div>
 
 <script>
-/* ===== DEMO 데이터 (가상 수치 · 실시간 아님) ===== */
+/* ===== 실제 데이터 · 기준일 2026-11-20(금) / 지표별 출처·기준일 카드에 표기 ===== */
 const DEFAULT_DATA = {
-  asOf: "DEMO",
+  asOf: "2026-11-20",
   metrics: [
-    {no:"01",cat:"MARKET",title:"SPY Drawdown",value:"-13.2%",unit:"고점 대비 하락률",status:"amber",
-     series:[62,60,61,58,59,54,55,50,46,48,44,41,43,38,36,32],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 −10% 주의 / −20% 약세장",src:"조정장·약세장 구분 · 주가 데이터 연동 예정"},
-    {no:"02",cat:"GROWTH",title:"QQQ Drawdown",value:"-23.4%",unit:"고점 대비 하락률",status:"red",
-     series:[70,69,68,65,66,62,60,58,52,54,48,44,40,38,34,30],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 −20% 성장주 약세 구간",src:"기술주 집중 위험 · 주가 데이터 연동 예정"},
-    {no:"03",cat:"VOLATILITY",title:"VIX Volatility",value:"28.6",unit:"변동성 지수",status:"amber",
-     series:[30,34,40,33,45,50,55,48,66,58,76,60,70,72,68,69],range:"최근 1개월",trend:"예시 추세",
-     rule:"관찰 기준 20 / 30 / 40 영역",src:"시장 공포·변동성 · Cboe / FRED"},
-    {no:"04",cat:"BREADTH",title:"S&P 500 Breadth",value:"39.8%",unit:"200일선 위 종목 비중",status:"red",
-     series:[72,70,73,66,68,64,62,58,50,52,44,40,38,34,30,28],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 비중과 4주 추세 동시 점검",src:"반등 확산·시장 내부 건강도 · 구성 종목·가격 데이터 필요"},
-    {no:"05",cat:"CREDIT",title:"High-Yield Credit Spread",value:"4.2%p",unit:"4주 변화 +0.75%p",status:"red",
-     series:[22,24,23,26,25,30,28,34,36,40,42,48,52,60,72,78],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 4주간 급격한 확대 여부",src:"신용 경색·위험 회피 신호 · FRED / ICE BofA"},
-    {no:"06",cat:"YIELDS",title:"10Y Treasury Yield",value:"4.32%",unit:"4주 변화 +0.28%p",status:"amber",
-     series:[28,26,32,34,36,42,40,46,44,50,54,58,62,66,72,78],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 4주 추세 / 실질금리 확인",src:"주식 할인율·밸류에이션 · FRED DGS10"},
-    {no:"07",cat:"POLICY",title:"2Y Treasury Yield",value:"3.91%",unit:"4주 변화 +0.08%p",status:"green",
-     series:[50,60,45,62,40,58,70,66,55,64,72,68,74,70,78,82],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 Fed 정책 기대의 변화 추적",src:"정책 금리 경로·시장 예상 · FRED DGS2"},
-    {no:"08",cat:"EARNINGS",title:"Forward EPS Revisions",value:"-1.3%",unit:"향후 12개월 EPS 추정치 변화",status:"red",
-     series:[80,78,77,76,74,72,70,68,66,62,58,52,48,42,36,28],range:"최근 3개월",trend:"예시 추세",
-     rule:"관찰 기준 1~3개월 상향 / 하향",src:"기업이익 전망·추정치 수정 · FactSet 등 계약·검증 필요"},
-    {no:"09",cat:"AI ECONOMICS",title:"AI CapEx / FCF",value:"38%",unit:"CapEx YoY / FCF YoY −12% (가상)",status:"amber",
-     series:[30,32,36,34,40,44,46,50,52,58,62,66,70,74,78,82],range:"최근 8개 분기 예시",trend:"예시 추세",
-     rule:"관찰 기준 CapEx 증가율·FCF 성장률 비교",src:"AI 투자 수익성·현금 창출 · SEC 10-Q·10-K, 컨센서스"},
-    {no:"10",cat:"INFLATION",title:"Fed · CPI / PCE",value:"0.2%p",unit:"예상 대비 물가 서프라이즈 (예시)",status:"amber",
-     series:[40,50,35,62,38,44,36,52,66,58,40,30,72,50,60,80],range:"최근 발표",trend:"예시 추세",
-     rule:"관찰 기준 시장 예상치 대비 실제 발표",src:"통화정책·성장주 방향 · BLS·BEA + 예상치 공급자"}
+    {no:"01",cat:"MARKET",title:"SPY Drawdown",value:"-11.7%",unit:"52주 고점(781.62) 대비 · 종가 689.81",status:"amber",
+     series:[762.6,765.72,763.47,765.91,766.08,771.1,769.35,767.05,761.78,765.16,773.17,770.19,765.96,762.4,757.83,764.29,760.88,757.39,754.05,762.6,761.69,773.5,773.38,767.81,767.18,771.35,765.61,764.2,762.63,763.99,769.64,774.83,779.09,777.22,773.93,778.57,778.1,778.01,769.6,771.79,763.25,766.48,769.05,773.09,763.96,759.97,765.37,769.66,772.31,769.36,755.72,752.1,754.35,766.81,733,735.29,752.69,749.92,759.81,757.12,754.37,739.95,732.44,730.2,715.87,689.81],
+     range:"최근 3개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 −10% 주의 / −20% 약세장 (11/20 하루 −3.6%)",src:"TradingView AMEX:SPY · 11/20 종가 · 52주 고점 대비"},
+    {no:"02",cat:"GROWTH",title:"QQQ Drawdown",value:"-20.2%",unit:"52주 고점(762.86) 대비 · 종가 608.45",status:"red",
+     series:[710.93,713.44,706.32,710.72,711.37,721.11,716.43,716.76,707.64,709.24,717.67,718.96,718.36,716.31,708.69,714.88,709.18,704.54,704.72,716.92,721.45,741.47,747.46,741.21,741.1,744.5,736.53,737.93,739.77,742.03,749.58,756.2,759.66,757.73,747.58,751.27,746.04,743.57,728.95,728,709.8,718.36,717.63,725.2,704.47,704.4,712.2,721.25,725.61,715.34,690.49,681.09,685.28,691.95,647.05,656.1,679.35,674.76,690.38,688.17,679.89,661.75,656.95,659.51,645.04,608.45],
+     range:"최근 3개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 −20% 성장주 약세 구간 진입",src:"TradingView NASDAQ:QQQ · 11/20 종가 · 52주 고점 대비"},
+    {no:"03",cat:"VOLATILITY",title:"VIX Volatility",value:"35.9",unit:"변동성 지수 · 전일비 +26%",status:"red",
+     series:[17.31,16.68,19.03,19.45,18.39,17.52,16.91,17.2,19.42,21.15,20.83,16.61,28.18,25.64,19.92,19.46,17.49,18.7,19.3,22.91,25.46,24.56,28.44,35.89],
+     range:"최근 1개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 20 / 30 / 40 영역 (30 초과, 장중 고점 40.03)",src:"TradingView CBOE:VIX · 11/20 종가"},
+    {no:"04",cat:"BREADTH",title:"S&P 500 Breadth",value:"N/A",unit:"200일선 위 종목 비중 · 11/20 값 미확인",status:"na",
+     series:null,range:"데이터 없음",trend:"검색으로 확인 불가",
+     rule:"참고: 10/29 약 63%(IG) · S&P 500 지수는 11/17 200일선 아래 마감(4/7 이후 처음)",src:"정확한 값은 ChartRow / Barchart 등에서 직접 확인 필요"},
+    {no:"05",cat:"CREDIT",title:"High-Yield Credit Spread",value:"3.20%p",unit:"11/12 기준 · 1주 −0.28%p (금요일 값 미확인)",status:"green",
+     series:[3.48,3.42,3.34,3.30,3.20],range:"11/5 ~ 11/12",trend:"FRED 일간",
+     rule:"관찰 기준 4주간 급격한 확대 여부 — 11/13 이후 변동 반영 안 됨",src:"FRED BAMLH0A0HYM2 · 최신 확인값 11/12 (금요일 급락 미반영 가능)"},
+    {no:"06",cat:"YIELDS",title:"10Y Treasury Yield",value:"4.95%",unit:"4주 변화 −0.01%p · 3개월 고점 5.37%",status:"amber",
+     series:[4.736,4.7,4.623,4.649,4.676,4.73,4.754,4.796,4.78,4.772,4.784,4.792,4.845,4.961,4.969,4.998,5.006,5.02,4.939,5,4.951,4.955,5.11,5.208,5.167,5.236,5.234,5.289,5.243,5.275,5.307,5.286,5.286,5.235,5.242,5.217,5.194,5.079,5.081,5.142,5.111,5.119,4.961,4.999,4.988,4.999,5.003,4.937,4.933,4.912,4.966,4.89,4.843,4.859,4.884,5,5.133,5.139,5.129,5.109,5.07,5.05,4.95],
+     range:"최근 3개월",trend:"TradingView 일봉",
+     rule:"관찰 기준 4주 추세 / 실질금리 확인 (11/20 하루 −0.10%p)",src:"TradingView TVC:US10Y · 11/20"},
+    {no:"07",cat:"POLICY",title:"2Y Treasury Yield",value:"4.65%",unit:"4주 변화 0.00%p · 3개월 +0.47%p",status:"amber",
+     series:[4.24,4.238,4.176,4.209,4.234,4.36,4.346,4.4,4.371,4.34,4.374,4.4,4.436,4.586,4.63,4.668,4.671,4.736,4.67,4.756,4.751,4.747,4.897,4.931,4.86,4.931,4.879,4.893,4.791,4.827,4.812,4.798,4.77,4.762,4.791,4.797,4.806,4.757,4.715,4.778,4.78,4.808,4.648,4.686,4.72,4.739,4.685,4.602,4.594,4.598,4.635,4.583,4.471,4.512,4.566,4.746,4.884,4.852,4.831,4.806,4.804,4.768,4.649],
+     range:"최근 3개월",trend:"TradingView 일봉",
+     rule:"관찰 기준 Fed 정책 기대 변화 (다음 FOMC 12/8-9, 11/20 하루 −0.12%p)",src:"TradingView TVC:US02Y · 11/20"},
+    {no:"08",cat:"EARNINGS",title:"Forward EPS Revisions",value:"$415.82",unit:"12M Fwd EPS (11/5) · YTD +33.6%",status:"green",
+     series:null,range:"추세 데이터 없음",trend:"FactSet 주간",
+     rule:"관찰 기준 1~3개월 상향 / 하향 — Q4 추정치 상향 중(11/13). 최근 주간 수정률 미확인",src:"FactSet Earnings Insight 11/5 · Fwd P/E 17.7 · 11/20 판은 확인 못함"},
+    {no:"09",cat:"AI ECONOMICS",title:"AI CapEx / FCF",value:"$557B",unit:"빅5 9개월 CapEx (전년 ≈2배) · FCF 흑자 $144B→적자 $14B",status:"amber",
+     series:null,range:"2026 3Q 기준",trend:"2차 출처",
+     rule:"관찰 기준 CapEx 증가율·FCF 성장률 비교 — Alphabet/Meta 3Q FCF 적자, MSFT 흑자",src:"언론·리서치 집계(CNBC/TechCrunch/Reuters 인용) · SEC 10-Q 검증 필요"},
+    {no:"10",cat:"INFLATION",title:"Fed · CPI / PCE",value:"+0.1%p",unit:"10월 CPI 전월비 +0.4% vs 예상 +0.3% · Core +0.3% vs +0.2%",status:"amber",
+     series:null,range:"11/10 발표",trend:"BLS",
+     rule:"관찰 기준 시장 예상치 대비 실제 발표 — 상회. 정부 셧다운으로 YoY 미발표(9월 3.7%)",src:"BLS·언론 보도 · 11월 CPI는 12/10 발표 예정"}
   ]
 };
 
-const LABEL = {red:"위험",amber:"주의",green:"정상"};
-const COLOR = {red:"#ff6b7a",amber:"#ffb84d",green:"#3fd6a0"};
+const LABEL = {red:"위험",amber:"주의",green:"정상",na:"미확인"};
+const COLOR = {red:"#ff6b7a",amber:"#ffb84d",green:"#3fd6a0",na:"#7f93b8"};
 let state = JSON.parse(JSON.stringify(DEFAULT_DATA));
 
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 function spark(series,status,id){
+  if(!series) return `<div class="nodata">추세 데이터 없음</div>`;
   const W=300,H=80,p=4,col=COLOR[status]||COLOR.amber;
   const min=Math.min(...series),max=Math.max(...series),rng=(max-min)||1;
   const pts=series.map((v,i)=>[p+i*(W-2*p)/(series.length-1), H-p-((v-min)/rng)*(H-2*p-10)-4]);
@@ -203,7 +211,7 @@ function render(){
     <div class="sum"><div><div class="lab">주의 신호 · AMBER</div><div class="big c-amber">${cnt.amber} / ${n}</div>
       <div class="note">추세와 기준치를 추가 확인</div></div><div class="dot amber"></div></div>
     <div class="sum"><div><div class="lab">정상 / 미확인</div><div class="big c-blue">${cnt.green} / ${n}</div>
-      <div class="note">미확인 지표는 안전으로 간주하지 않음</div></div><div class="dot ring"></div></div>`;
+      <div class="note">미확인 ${cnt.na||0}개 — 안전으로 간주하지 않음</div></div><div class="dot ring"></div></div>`;
 
   document.getElementById("grid").innerHTML=m.map((x,i)=>`
     <article class="card ${x.status}">
@@ -231,7 +239,7 @@ document.getElementById("file").onchange=e=>{
   r.onload=()=>{
     try{
       const d=JSON.parse(r.result);
-      if(!Array.isArray(d.metrics)||!d.metrics.every(x=>x.title&&x.value!==undefined&&LABEL[x.status]&&Array.isArray(x.series)&&x.series.length>1))
+      if(!Array.isArray(d.metrics)||!d.metrics.every(x=>x.title&&x.value!==undefined&&LABEL[x.status]&&(x.series==null||(Array.isArray(x.series)&&x.series.length>1))))
         throw new Error("형식 오류");
       state=d;render();toast("JSON을 불러왔습니다");
     }catch(err){toast("불러오기 실패: JSON 형식을 확인하세요")}
