@@ -23,6 +23,7 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
 .subtitle{font-size:12.5px;color:var(--mute)}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .btn,.demo{font:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:9px 14px;border:1px solid var(--line2);background:#0f1d36;color:var(--text);cursor:pointer}
+a.btn{text-decoration:none;display:inline-block}
 .btn:hover{border-color:var(--blue);background:#12254a}
 .demo{border-color:#8a6a2a;background:#2a2110;color:var(--amber);border-radius:999px;cursor:default}
 
@@ -92,6 +93,7 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
     <div class="actions">
       <span class="demo" id="asof">● 기준일 확인 중…</span>
       <button class="btn" id="btnRefresh" title="data.json을 다시 불러옵니다">↻ 업데이트</button>
+      <a class="btn" href="https://github.com/kiotradex-svg/my-project/actions/workflows/update-data.yml" target="_blank" rel="noopener" title="GitHub에서 Run workflow를 눌러 지금 새 데이터를 가져옵니다 (1~3분 후 ↻ 업데이트)">⚙ 데이터 갱신 실행</a>
       <button class="btn" id="btnSave">JSON 예시 저장</button>
       <button class="btn" id="btnLoad">JSON 불러오기</button>
       <button class="btn" onclick="window.print()">인쇄 / PDF</button>
