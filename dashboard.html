@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미국 증시 10대 핵심 지표 대시보드</title>
+<style>
+:root{
+  --bg:#0a1424; --bg2:#0e1b30; --card:#111f38; --line:#1f3050; --line2:#2a3d63;
+  --text:#eaf0fb; --mute:#8fa1c0; --dim:#6c7f9f;
+  --red:#ff6b7a; --amber:#ffb84d; --green:#3fd6a0; --blue:#4c8dff;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 600px at 20% -10%,#14284a 0%,var(--bg) 60%) fixed,var(--bg);
+  color:var(--text);font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  padding:18px 18px 40px;min-height:100vh;
+}
+.wrap{max-width:1880px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.eyebrow{font-size:12px;letter-spacing:.2em;font-weight:700;color:#7f9bd4}
+h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
+.subtitle{font-size:12.5px;color:var(--mute)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn,.demo{font:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:9px 14px;border:1px solid var(--line2);background:#0f1d36;color:var(--text);cursor:pointer}
+.btn:hover{border-color:var(--blue);background:#12254a}
+.demo{border-color:#8a6a2a;background:#2a2110;color:var(--amber);border-radius:999px;cursor:default}
+
+.summary{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.sum{background:linear-gradient(180deg,#101e37,#0d1a30);border:1px solid var(--line);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.sum .lab{font-size:11.5px;color:var(--mute);letter-spacing:.04em;margin-bottom:8px}
+.sum .big{font-size:28px;font-weight:800;letter-spacing:.01em}
+.sum .big small{font-size:28px;color:inherit;font-weight:800}
+.sum .note{font-size:11.5px;color:var(--mute);margin-top:8px}
+.dot{width:22px;height:22px;border-radius:50%}
+.c-red{color:var(--red)} .c-amber{color:var(--amber)} .c-green{color:var(--green)} .c-blue{color:var(--blue)}
+.dot.red{background:var(--red);box-shadow:0 0 18px #ff6b7a66}
+.dot.amber{background:var(--amber);box-shadow:0 0 18px #ffb84d66}
+.dot.ring{border:2px solid var(--blue);background:transparent}
+.diamond{width:22px;height:22px;transform:rotate(45deg);border:3px solid #fff;border-radius:3px;position:relative;margin-right:6px}
+.diamond::after{content:"";position:absolute;inset:3px;background:#fff}
+
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.card{background:linear-gradient(180deg,#112039,#0d1a30);border:1px solid var(--line);border-top:2px solid var(--amber);border-radius:12px;padding:14px 16px 12px;display:flex;flex-direction:column;position:relative;transition:transform .15s,border-color .15s}
+.card:hover{transform:translateY(-2px)}
+.card.red{border-top-color:var(--red)} .card.amber{border-top-color:var(--amber)} .card.green{border-top-color:var(--green)} .card.na{border-top-color:#7f93b8}
+.card .top{display:flex;justify-content:space-between;align-items:flex-start}
+.card .cat{font-size:10.5px;letter-spacing:.18em;font-weight:700;color:#7f93b8}
+.card .ttl{font-size:14.5px;font-weight:700;margin-top:6px}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;display:inline-flex;align-items:center;gap:5px}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.badge.red{color:var(--red);background:#3a1a2a}
+.badge.amber{color:var(--amber);background:#33291a}
+.badge.green{color:var(--green);background:#12332f}
+.badge.na{color:#9fb0cf;background:#1c2942}
+.nodata{height:100%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim);border:1px dashed var(--line2);border-radius:8px}
+.val{display:flex;align-items:baseline;gap:8px;margin:14px 0 4px}
+.val b{font-size:38px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.val span{font-size:10.5px;color:var(--mute)}
+.spark{height:78px;margin:6px 0 4px}
+.spark svg{width:100%;height:100%;display:block;overflow:visible}
+.meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--mute);margin-top:8px}
+.rule{font-size:11.5px;font-weight:600;margin-top:10px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.src{font-size:10.5px;color:var(--dim);margin-top:10px}
+
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.panel{background:linear-gradient(180deg,#101e37,#0d1a30);border:1px solid var(--line);border-radius:12px;padding:16px 20px}
+.panel h3{font-size:13px;margin-bottom:10px;letter-spacing:.04em}
+.panel ul{padding-left:18px;font-size:12.5px;color:var(--mute);line-height:1.8}
+.panel li b{color:var(--text)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#152a4d;border:1px solid var(--blue);padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+
+@media(max-width:1500px){.grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(3,1fr)}.summary{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.bottom{grid-template-columns:1fr}}
+@media(max-width:520px){.grid,.summary{grid-template-columns:1fr}h1{font-size:24px}}
+@media print{
+  body{background:#0a1424!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:8px}
+  .actions{display:none}.card:hover{transform:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">INVESTMENT HQ / MACRO &amp; RISK INTELLIGENCE</div>
+      <h1>미국 증시 10대 핵심 지표 대시보드</h1>
+      <div class="subtitle">1장 통합 • 10개 지표 • 장기투자 90% / 단기매매 10% • 출처·기준일은 각 카드에 표기</div>
+    </div>
+    <div class="actions">
+      <span class="demo" id="asof">● 기준일 확인 중…</span>
+      <button class="btn" id="btnRefresh" title="data.json을 다시 불러옵니다">↻ 업데이트</button>
+      <button class="btn" id="btnSave">JSON 예시 저장</button>
+      <button class="btn" id="btnLoad">JSON 불러오기</button>
+      <button class="btn" onclick="window.print()">인쇄 / PDF</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+  </header>
+
+  <section class="summary" id="summary"></section>
+  <section class="grid" id="grid"></section>
+
+  <section class="bottom">
+    <div class="panel">
+      <h3>해석 가이드 · HOW TO READ</h3>
+      <ul>
+        <li><b>위험(RED)</b>: 지표별 단독 경고 기준을 넘은 상태 — 추세 확인 후 비중 조절 검토</li>
+        <li><b>주의(AMBER)</b>: 관찰 구간 — 추세와 기준치를 추가 확인</li>
+        <li><b>정상(GREEN)</b>: 기준 내 — 단, 단일 지표로 안전을 단정하지 않음</li>
+        <li>종합 리스크는 보조 판단 기준이며 <b>매매 신호가 아닙니다</b></li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3>데이터 연동 체크리스트 · DATA TODO</h3>
+      <ul>
+        <li>주가·변동성: Cboe / FRED (SPY, QQQ, VIX) — 일 단위 갱신</li>
+        <li>금리·스프레드: FRED DGS10 / DGS2, ICE BofA HY OAS</li>
+        <li>이익 전망·CapEx: FactSet, SEC 10-Q/10-K (계약 및 검증 필요)</li>
+        <li>물가·통화정책: BLS-BEA, Fed 발표 + 예상치 공급자</li>
+      </ul>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== 실제 데이터 · 기준일 2026-11-20(금) / 지표별 출처·기준일 카드에 표기 ===== */
+const DEFAULT_DATA = {
+  asOf: "2026-11-20",
+  metrics: [
+    {no:"01",cat:"MARKET",title:"SPY Drawdown",value:"-11.7%",unit:"52주 고점(781.62) 대비 · 종가 689.81",status:"amber",
+     series:[762.6,765.72,763.47,765.91,766.08,771.1,769.35,767.05,761.78,765.16,773.17,770.19,765.96,762.4,757.83,764.29,760.88,757.39,754.05,762.6,761.69,773.5,773.38,767.81,767.18,771.35,765.61,764.2,762.63,763.99,769.64,774.83,779.09,777.22,773.93,778.57,778.1,778.01,769.6,771.79,763.25,766.48,769.05,773.09,763.96,759.97,765.37,769.66,772.31,769.36,755.72,752.1,754.35,766.81,733,735.29,752.69,749.92,759.81,757.12,754.37,739.95,732.44,730.2,715.87,689.81],
+     range:"최근 3개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 −10% 주의 / −20% 약세장 (11/20 하루 −3.6%)",src:"TradingView AMEX:SPY · 11/20 종가 · 52주 고점 대비"},
+    {no:"02",cat:"GROWTH",title:"QQQ Drawdown",value:"-20.2%",unit:"52주 고점(762.86) 대비 · 종가 608.45",status:"red",
+     series:[710.93,713.44,706.32,710.72,711.37,721.11,716.43,716.76,707.64,709.24,717.67,718.96,718.36,716.31,708.69,714.88,709.18,704.54,704.72,716.92,721.45,741.47,747.46,741.21,741.1,744.5,736.53,737.93,739.77,742.03,749.58,756.2,759.66,757.73,747.58,751.27,746.04,743.57,728.95,728,709.8,718.36,717.63,725.2,704.47,704.4,712.2,721.25,725.61,715.34,690.49,681.09,685.28,691.95,647.05,656.1,679.35,674.76,690.38,688.17,679.89,661.75,656.95,659.51,645.04,608.45],
+     range:"최근 3개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 −20% 성장주 약세 구간 진입",src:"TradingView NASDAQ:QQQ · 11/20 종가 · 52주 고점 대비"},
+    {no:"03",cat:"VOLATILITY",title:"VIX Volatility",value:"35.9",unit:"변동성 지수 · 전일비 +26%",status:"red",
+     series:[17.31,16.68,19.03,19.45,18.39,17.52,16.91,17.2,19.42,21.15,20.83,16.61,28.18,25.64,19.92,19.46,17.49,18.7,19.3,22.91,25.46,24.56,28.44,35.89],
+     range:"최근 1개월 종가",trend:"TradingView 일봉",
+     rule:"관찰 기준 20 / 30 / 40 영역 (30 초과, 장중 고점 40.03)",src:"TradingView CBOE:VIX · 11/20 종가"},
+    {no:"04",cat:"BREADTH",title:"S&P 500 Breadth",value:"45.9%",unit:"200일선 위 종목 비중 · 11/20 (MacroMicro)",status:"amber",
+     series:null,range:"추세 데이터 없음",trend:"MacroMicro 일간",
+     rule:"관찰 기준 비중과 4주 추세 — StockCharts도 '50% 미만'. S&P 500 6,910 마감(200일선 7,349 대비 −6.0%, 7연속 하락)",src:"MacroMicro S5TH 11/20 · Investing.com 등은 중순 약 60%로 불일치 → 원천 확인 필요"},
+    {no:"05",cat:"CREDIT",title:"High-Yield Credit Spread",value:"3.52%p",unit:"11/19 기준(11/20 미공표) · 4주 +0.12%p · 1주 +0.29%p",status:"amber",
+     series:[3.33,3.27,3.40,3.38,3.30,3.18,3.14,3.26,3.44,3.43,3.40,3.32,3.48,3.42,3.34,3.30,3.30,3.20,3.23,3.34,3.43,3.47,3.52],range:"10/20 ~ 11/19",trend:"FRED 일간",
+     rule:"관찰 기준 4주간 급격한 확대 여부 — 11/12 저점 3.20 이후 7일 연속 확대 흐름, CCC 중심 확대",src:"FRED BAMLH0A0HYM2 직접 조회 · 11/19 (11/20 값은 11/23 갱신 예정)"},
+    {no:"06",cat:"YIELDS",title:"10Y Treasury Yield",value:"4.95%",unit:"4주 변화 −0.01%p · 3개월 고점 5.37%",status:"amber",
+     series:[4.736,4.7,4.623,4.649,4.676,4.73,4.754,4.796,4.78,4.772,4.784,4.792,4.845,4.961,4.969,4.998,5.006,5.02,4.939,5,4.951,4.955,5.11,5.208,5.167,5.236,5.234,5.289,5.243,5.275,5.307,5.286,5.286,5.235,5.242,5.217,5.194,5.079,5.081,5.142,5.111,5.119,4.961,4.999,4.988,4.999,5.003,4.937,4.933,4.912,4.966,4.89,4.843,4.859,4.884,5,5.133,5.139,5.129,5.109,5.07,5.05,4.95],
+     range:"최근 3개월",trend:"TradingView 일봉",
+     rule:"관찰 기준 4주 추세 / 실질금리 확인 (11/20 하루 −0.10%p)",src:"TradingView TVC:US10Y · 11/20"},
+    {no:"07",cat:"POLICY",title:"2Y Treasury Yield",value:"4.65%",unit:"4주 변화 0.00%p · 3개월 +0.47%p",status:"amber",
+     series:[4.24,4.238,4.176,4.209,4.234,4.36,4.346,4.4,4.371,4.34,4.374,4.4,4.436,4.586,4.63,4.668,4.671,4.736,4.67,4.756,4.751,4.747,4.897,4.931,4.86,4.931,4.879,4.893,4.791,4.827,4.812,4.798,4.77,4.762,4.791,4.797,4.806,4.757,4.715,4.778,4.78,4.808,4.648,4.686,4.72,4.739,4.685,4.602,4.594,4.598,4.635,4.583,4.471,4.512,4.566,4.746,4.884,4.852,4.831,4.806,4.804,4.768,4.649],
+     range:"최근 3개월",trend:"TradingView 일봉",
+     rule:"관찰 기준 Fed 정책 기대 변화 (다음 FOMC 12/8-9, 11/20 하루 −0.12%p)",src:"TradingView TVC:US02Y · 11/20"},
+    {no:"08",cat:"EARNINGS",title:"Forward EPS Revisions",value:"$415.82",unit:"12M Fwd EPS (11/5) · 11/13 Fwd P/E 18.3 · Q4 성장률 +28.3%",status:"amber",
+     series:null,range:"추세 데이터 없음",trend:"FactSet 주간",
+     rule:"관찰 기준 1~3개월 상향 / 하향 — Q4 성장률 추정 28.4%(11/6)→28.3%(11/13)로 소폭 하향. 11/20 판·정확한 수정률 미확인",src:"FactSet Earnings Insight 11/6·11/13 (검색 요약 인용) · 원문 PDF 미열람"},
+    {no:"09",cat:"AI ECONOMICS",title:"AI CapEx / FCF",value:"$202B+",unit:"빅4 3분기 단일분기 CapEx $202~209B · 4사 중 3사 FCF 적자",status:"red",
+     series:null,range:"2026 3Q 기준",trend:"2차 출처",
+     rule:"관찰 기준 CapEx 증가율·FCF 비교 — Alphabet CapEx 51.4B/FCF −9.1B, Meta 34.9B/−2.1B, Amazon 77.3B(TTM FCF −42.4B), MSFT FCF +18.6B. 연간 가이던스 $720~740B",src:"언론·분석 사이트 집계 · 정의(리스 포함 등) 차이 있음 → SEC 10-Q 대조 필요"},
+    {no:"10",cat:"INFLATION",title:"Fed · CPI / PCE",value:"+0.1%p",unit:"10월 CPI 전월비 +0.4% vs 예상 +0.3% · Core +0.3% vs +0.2%",status:"amber",
+     series:null,range:"11/10 발표",trend:"BLS",
+     rule:"관찰 기준 시장 예상치 대비 실제 발표 — 상회. 정부 셧다운으로 YoY 미발표(9월 3.7%)",src:"BLS·언론 보도 · 11월 CPI는 12/10 발표 예정"}
+  ]
+};
+
+const LABEL = {red:"위험",amber:"주의",green:"정상",na:"미확인"};
+const COLOR = {red:"#ff6b7a",amber:"#ffb84d",green:"#3fd6a0",na:"#7f93b8"};
+let state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function spark(series,status,id){
+  if(!series) return `<div class="nodata">추세 데이터 없음</div>`;
+  const W=300,H=80,p=4,col=COLOR[status]||COLOR.amber;
+  const min=Math.min(...series),max=Math.max(...series),rng=(max-min)||1;
+  const pts=series.map((v,i)=>[p+i*(W-2*p)/(series.length-1), H-p-((v-min)/rng)*(H-2*p-10)-4]);
+  const line=pts.map((q,i)=>(i?"L":"M")+q[0].toFixed(1)+" "+q[1].toFixed(1)).join(" ");
+  const area=line+` L${pts.at(-1)[0]} ${H} L${pts[0][0]} ${H} Z`;
+  const mid=(H/2).toFixed(0), last=pts.at(-1);
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="최근 추세 미니 차트">
+    <defs><linearGradient id="g${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${col}" stop-opacity=".22"/><stop offset="1" stop-color="${col}" stop-opacity=".02"/></linearGradient></defs>
+    <line x1="0" x2="${W}" y1="${mid}" y2="${mid}" stroke="#3a4c70" stroke-dasharray="3 4" stroke-width="1" vector-effect="non-scaling-stroke"/>
+    <path d="${area}" fill="url(#g${id})"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${col}"/></svg>`;
+}
+
+function regime(r,a){
+  if(r>=6) return {t:"CRITICAL RISK",c:"c-red"};
+  if(r>=3) return {t:"ELEVATED RISK",c:"c-red"};
+  if(r>=1||a>=4) return {t:"MODERATE RISK",c:"c-amber"};
+  return {t:"LOW RISK",c:"c-green"};
+}
+
+function render(){
+  const m=state.metrics, n=m.length;
+  const cnt={red:0,amber:0,green:0};
+  m.forEach(x=>cnt[x.status]=(cnt[x.status]||0)+1);
+  const rg=regime(cnt.red,cnt.amber);
+
+  document.getElementById("summary").innerHTML=`
+    <div class="sum"><div><div class="lab">종합 리스크 · MARKET REGIME</div><div class="big ${rg.c}">${rg.t}</div>
+      <div class="note">자동 신호는 보조 판단 기준이며 매매 신호가 아닙니다</div></div><div class="diamond"></div></div>
+    <div class="sum"><div><div class="lab">위험 신호 · RED</div><div class="big c-red">${cnt.red} / ${n}</div>
+      <div class="note">지표별 단독 경고를 집계</div></div><div class="dot red"></div></div>
+    <div class="sum"><div><div class="lab">주의 신호 · AMBER</div><div class="big c-amber">${cnt.amber} / ${n}</div>
+      <div class="note">추세와 기준치를 추가 확인</div></div><div class="dot amber"></div></div>
+    <div class="sum"><div><div class="lab">정상 / 미확인</div><div class="big c-blue">${cnt.green} / ${n}</div>
+      <div class="note">미확인 ${cnt.na||0}개 — 안전으로 간주하지 않음</div></div><div class="dot ring"></div></div>`;
+
+  document.getElementById("grid").innerHTML=m.map((x,i)=>`
+    <article class="card ${x.status}">
+      <div class="top"><div><div class="cat">${esc(x.no)} / ${esc(x.cat)}</div><div class="ttl">${esc(x.title)}</div></div>
+        <span class="badge ${x.status}">${LABEL[x.status]||""}</span></div>
+      <div class="val"><b>${esc(x.value)}</b><span>${esc(x.unit)}</span></div>
+      <div class="spark">${spark(x.series,x.status,i)}</div>
+      <div class="meta"><span>${esc(x.range)}</span><span>${esc(x.trend)}</span></div>
+      <div class="rule">${esc(x.rule)}</div>
+      <div class="src">${esc(x.src)}</div>
+    </article>`).join("");
+}
+
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),2200)}
+
+document.getElementById("btnSave").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="dashboard-sample.json";a.click();
+  URL.revokeObjectURL(a.href);toast("JSON 예시를 저장했습니다");
+};
+document.getElementById("btnLoad").onclick=()=>document.getElementById("file").click();
+document.getElementById("file").onchange=e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!Array.isArray(d.metrics)||!d.metrics.every(x=>x.title&&x.value!==undefined&&LABEL[x.status]&&(x.series==null||(Array.isArray(x.series)&&x.series.length>1))))
+        throw new Error("형식 오류");
+      state=d;render();toast("JSON을 불러왔습니다");
+    }catch(err){toast("불러오기 실패: JSON 형식을 확인하세요")}
+  };
+  r.readAsText(f);e.target.value="";
+};
+function setAsOf(){
+  const el=document.getElementById("asof");
+  el.textContent="● 기준일 "+(state.asOf||"-")+(state.updatedAt?" · 갱신 "+state.updatedAt:"")+" · 일부 지표는 최신 확인값";
+}
+async function loadData(manual){
+  try{
+    const r=await fetch("data.json?ts="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    if(!Array.isArray(d.metrics)) throw new Error("형식 오류");
+    state=d;render();setAsOf();
+    if(manual) toast("data.json을 불러왔습니다");
+  }catch(e){
+    render();setAsOf();
+    if(manual) toast("data.json을 불러오지 못했습니다 (서버/Pages에서 열어야 합니다) — 내장 데이터 표시");
+  }
+}
+document.getElementById("btnRefresh").onclick=()=>loadData(true);
+render();setAsOf();loadData(false);
+</script>
+</body>
+</html>
