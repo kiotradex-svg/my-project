@@ -90,7 +90,8 @@ h1{font-size:30px;font-weight:800;margin:4px 0 6px;letter-spacing:-.01em}
       <div class="subtitle">1장 통합 • 10개 지표 • 장기투자 90% / 단기매매 10% • 출처·기준일은 각 카드에 표기</div>
     </div>
     <div class="actions">
-      <span class="demo">● 2026-11-20(금) 기준 · 일부 지표는 최신 확인값</span>
+      <span class="demo" id="asof">● 기준일 확인 중…</span>
+      <button class="btn" id="btnRefresh" title="data.json을 다시 불러옵니다">↻ 업데이트</button>
       <button class="btn" id="btnSave">JSON 예시 저장</button>
       <button class="btn" id="btnLoad">JSON 불러오기</button>
       <button class="btn" onclick="window.print()">인쇄 / PDF</button>
@@ -246,7 +247,25 @@ document.getElementById("file").onchange=e=>{
   };
   r.readAsText(f);e.target.value="";
 };
-render();
+function setAsOf(){
+  const el=document.getElementById("asof");
+  el.textContent="● 기준일 "+(state.asOf||"-")+(state.updatedAt?" · 갱신 "+state.updatedAt:"")+" · 일부 지표는 최신 확인값";
+}
+async function loadData(manual){
+  try{
+    const r=await fetch("data.json?ts="+Date.now(),{cache:"no-store"});
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    if(!Array.isArray(d.metrics)) throw new Error("형식 오류");
+    state=d;render();setAsOf();
+    if(manual) toast("data.json을 불러왔습니다");
+  }catch(e){
+    render();setAsOf();
+    if(manual) toast("data.json을 불러오지 못했습니다 (서버/Pages에서 열어야 합니다) — 내장 데이터 표시");
+  }
+}
+document.getElementById("btnRefresh").onclick=()=>loadData(true);
+render();setAsOf();loadData(false);
 </script>
 </body>
 </html>
